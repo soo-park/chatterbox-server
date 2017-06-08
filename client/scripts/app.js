@@ -1,9 +1,8 @@
-
 var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
   //to all messages sent by the user
-  server: 'http://127.0.0.1:3000/classes/messages',
+  server: 'http://localhost:3000/classes/messages',
   username: 'anonymous',
   roomname: 'lobby',
   lastMessageId: 0,
@@ -33,6 +32,8 @@ var app = {
     setInterval(function() {
       app.fetch(true);
     }, 3000);
+  
+    app.send({text: 'wwwa', username: 'adafs', roomname: 'lobby'});
     
   },
 
@@ -62,24 +63,20 @@ var app = {
       url: app.server,
       type: 'GET',
       success: function(data) {
-        console.log(data.results[0]);
-        if (!data.results || !data.results.length) { return; }
+        // || !data.results.length <- renderMessages stopss spinner
+        if (!data.results) { return; }
 
         // Store messages for caching later
         app.messages = data.results;
 
         // Get the last message
         var mostRecentMessage = data.results[data.results.length - 1];
-
-        // Only bother updating the DOM if we have a new message
-
         // Update the UI with the fetched rooms
         app.renderRoomList(data.results);
 
         // Update the UI with the fetched messages
         app.renderMessages(data.results, animate);
 
-        
       },
       error: function(error) {
         console.error('chatterbox: Failed to fetch messages', error);
@@ -94,7 +91,6 @@ var app = {
   renderMessages: function(messages, animate) {
     // Clear existing messages`
     app.clearMessages();
-    console.log('rendering');
     app.stopSpinner();
     if (Array.isArray(messages)) {
       // Add all fetched messages that are in our current room
